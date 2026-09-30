@@ -1,0 +1,37 @@
+name: cazador
+
+on:
+  schedule:
+    # Cada 6 horas (UTC). GitHub puede demorarlo unos minutos en plan gratis.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  cazar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar deps
+        run: pip install requests
+
+      - name: Caceria
+        run: python agent/loop.py
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+
+      - name: Guardar hallazgos en el repo
+        run: |
+          git config user.name "cazador"
+          git config user.email "cazador@local"
+          git add hallazgos runbook.md
+          git diff --cached --quiet || git commit -m "caceria $(date -u +%F-%H%M)"
+          git push
