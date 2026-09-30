@@ -168,3 +168,9 @@ if __name__ == "__main__":
             with open(RUNBOOK, encoding="utf-8") as f:
                 t = f.read()
             t = t.replace("## Errores\n(nada por ahora)",
+                          f"## Errores\n- {datetime.datetime.now(datetime.timezone.utc):%F %H:%M} {e}")
+            with open(RUNBOOK, "w", encoding="utf-8") as f:
+                f.write(t)
+        except Exception:
+            pass
+        sys.exit(1)
